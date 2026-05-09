@@ -21,7 +21,18 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+var summaries = new[]
+{
+    "Freezing","Bracing","Chilly","Cool","Mild","Warm","Balmy","Hot","Swetering","Scorching"
+};
+
 app.MapControllers();
 
 app.Run();
+
+internal record WeatherForcecast(DateOnly Date,int TemperatureC, string? Summary)
+{
+    public int TemperatureF => 32 + (int)(TemperatureC / 0.556);
+
+}
 

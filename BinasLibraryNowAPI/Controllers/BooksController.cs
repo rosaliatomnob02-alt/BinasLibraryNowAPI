@@ -38,15 +38,15 @@ namespace BinasLibraryNowAPI.Controllers
         public IActionResult GetAll() => Ok(books);
 
 
-        [HttpGet("{id}")]
+        [HttpGet]
         public IActionResult GetById(int id)
         {
             var book = books.FirstOrDefault(b => b.Id == id);
             return book == null ? NotFound() : Ok(book);
         }
 
-        [HttpPost]
-        public IActionResult POST([FromBody] Book newBook)
+        [HttpPost("{id}")]
+        public IActionResult Create([FromBody] Book newBook)
         {
             newBook.Id = books.Count + 1;
             books.Add(newBook);
@@ -54,7 +54,7 @@ namespace BinasLibraryNowAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult PUT(int id , [FromBody] Book updatedBook)
+        public IActionResult Update(int id , [FromBody] Book updatedBook)
         {
            var book = books.FirstOrDefault (b => b.Id == id);
             if(book == null)
@@ -73,16 +73,17 @@ namespace BinasLibraryNowAPI.Controllers
         [HttpDelete("{id}")]
         public IActionResult DELETE(int id)
         {
-            var book = books.FirstOrDefault( b => b.Id == id);
-            if(book == null)
+            var book = books.FirstOrDefault(b => b.Id == id);
+            if (book == null)
             {
-                return NotFound();
-            }
+                return NotFound(new { status = "error", message = "Book not found" });
+            } 
 
             books.Remove(book);
-            return Ok(book);
-
+            return Ok(new { status = "error", message = "Book not deleted" });
+        }
+        
         }
     }
-}
+
 
