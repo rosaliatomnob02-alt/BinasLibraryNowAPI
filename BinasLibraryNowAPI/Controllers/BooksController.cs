@@ -38,7 +38,7 @@ namespace BinasLibraryNowAPI.Controllers
         public IActionResult GetAll() => Ok(books);
 
 
-        [HttpGet]
+        [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
             var book = books.FirstOrDefault(b => b.Id == id);
