@@ -1,6 +1,8 @@
-﻿using BinasLibraryNowAPI.Modals;
+using BinasLibraryNowAPI.Modals;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BinasLibraryNowAPI.Controllers
 {
@@ -8,6 +10,7 @@ namespace BinasLibraryNowAPI.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
+        // Static list to persist data in memory while the app is running
         private static List<Book> books = new List<Book>
         {
             new Book
@@ -19,71 +22,73 @@ namespace BinasLibraryNowAPI.Controllers
                 isAvailable = true,
                 PublishedYear = 2021
             },
+            new Book
             {
-                new Book
-                {
-                 Id = 2,
-                 Title = "Whispers in the Wind",
-                 Author = "Marco Dela Cruz",
-                 Genre = "Mystery",
-                 isAvailable = true,
-                 PublishedYear = 2018
-                }
+                Id = 2,
+                Title = "Whispers in the Wind",
+                Author = "Marco Dela Cruz",
+                Genre = "Mystery",
+                isAvailable = true,
+                PublishedYear = 2018
             }
         };
 
+        // GET: api/v1/books
         [HttpGet]
+        public IActionResult GetAll() 
+        {
+            return Ok(books);
+        }
 
-
-        public IActionResult GetAll() => Ok(books);
-
-
+        // GET: api/v1/books/{id}
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
             var book = books.FirstOrDefault(b => b.Id == id);
-            return book == null ? NotFound() : Ok(book);
+            return book == null ? NotFound(new { message = "Book not found" }) : Ok(book);
         }
 
-        [HttpPost("{id}")]
+        // POST: api/v1/books
+        [HttpPost]
         public IActionResult Create([FromBody] Book newBook)
         {
-            newBook.Id = books.Count + 1;
+            newBook.Id = books.Count > 0 ? books.Max(b => b.Id) + 1 : 1;
             books.Add(newBook);
-            return Ok(newBook);
+            // Returns a 201 Created status with the location of the new resource
+            return CreatedAtAction(nameof(GetById), new { id = newBook.Id }, newBook);
         }
 
+        // PUT: api/v1/books/{id}
         [HttpPut("{id}")]
-        public IActionResult Update(int id , [FromBody] Book updatedBook)
+        public IActionResult Update(int id, [FromBody] Book updatedBook)
         {
-           var book = books.FirstOrDefault (b => b.Id == id);
-            if(book == null)
+            var book = books.FirstOrDefault(b => b.Id == id);
+            if (book == null)
             {
-                return NotFound();
+                return NotFound(new { message = "Book not found" });
             }
 
+            book.Title = updatedBook.Title;
             book.Author = updatedBook.Author;
             book.Genre = updatedBook.Genre;
             book.isAvailable = updatedBook.isAvailable;
             book.PublishedYear = updatedBook.PublishedYear;
-            
+
             return Ok(book);
         }
 
+        // DELETE: api/v1/books/{id}
         [HttpDelete("{id}")]
-        public IActionResult DELETE(int id)
+        public IActionResult Delete(int id)
         {
             var book = books.FirstOrDefault(b => b.Id == id);
             if (book == null)
             {
                 return NotFound(new { status = "error", message = "Book not found" });
-            } 
+            }
 
             books.Remove(book);
-            return Ok(new { status = "error", message = "Book not deleted" });
-        }
-        
+            return Ok(new { status = "success", message = "Book deleted successfully" });
         }
     }
-
-
+}
